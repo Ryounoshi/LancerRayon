@@ -47,6 +47,7 @@ struct Sphere
     const glm::vec3 center;
 };
 
+
 struct Triangle
 {
     const glm::vec3 v0, v1, v2;
