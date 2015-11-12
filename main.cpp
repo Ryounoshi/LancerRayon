@@ -47,7 +47,6 @@ struct Sphere
     const glm::vec3 center;
 };
 
-
 struct Triangle
 {
     const glm::vec3 v0, v1, v2;
@@ -56,10 +55,11 @@ struct Triangle
 struct Box{
     glm::vec3 min;
     glm::vec3 max;
-};
+    std::vector<Triangle> triangles;
+    std::vector<Box> b;
+    void cut(){
 
-struct BoxList{
-
+    }
 };
 
 struct Mesh{
@@ -67,6 +67,7 @@ struct Mesh{
     std::vector<glm::vec3> normals;
     std::vector<int> faces;
     std::vector<int> normalIds;
+    std::vector<Triangle> triangles;
     Box boundbox;
 
     Geometry(const glm::vec3 &center, const char* obj) {
@@ -107,13 +108,16 @@ struct Mesh{
                 normalIds.push_back(k1-1);
                 normalIds.push_back(k2-1);
             }
-
         }
 /*
         boundingSphere.C = 0.5*(minVal+maxVal);
         boundingSphere.R = sqrt((maxVal-minVal).sqrNorm())*0.5;
 */
         fclose(f);
+        for(unsigned int i=0; i<faces.size()-2; i++){
+            Triangle titi{vertices.at(faces.at(i)),vertices.at(faces.at(i+1)),vertices.at(faces.at(i+2))};
+            triangles.push_back(titi);
+        }
     }
 };
 
@@ -251,7 +255,7 @@ bool intersectBox2(const Ray &r, const glm::vec3 &min, const glm::vec3 &max)
 float intersect (const Ray & ray, const Mesh &mesh){
     if(!intersectBox(ray, mesh.boundbox.min, mesh.boundbox.max))return noIntersect;
     float pluproche = noIntersect;
-    for(int i=0; i<mesh.faces.size()-2; i++){
+    for(unsigned int i=0; i<mesh.faces.size()-2; i++){
         Triangle titi{mesh.vertices.at(mesh.faces.at(i)),mesh.vertices.at(mesh.faces.at(i+1)),mesh.vertices.at(mesh.faces.at(i+2))};
         float tutu = intersect(ray, titi);
         if(tutu!=noIntersect){
@@ -782,7 +786,7 @@ int main (int, char **)
     }
 
     {
-        std::fstream f("image.ppm", std::fstream::out);
+        std::fstream f("../image.ppm", std::fstream::out);
         f << "P3\n" << w << " " << h << std::endl << "255" << std::endl;
 
         for (auto c : colors)
